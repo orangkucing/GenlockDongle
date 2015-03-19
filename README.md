@@ -2,9 +2,13 @@
 
 A hardware emulator of GoPro Hero 3+ Black: the dongle communicates with GoPro Dual Hero System using I2C and with MewPro using UART, and extracts/transmits genlock signals. 
 
-Resources:
+Resources of Genlock Dongle:
+* How To Use Genlock Dongle: [http://mewpro.cc/?p=574]
+* Schematic of Genlock Dongle: [http://mewpro.cc/wp-content/uploads/Dongle.pdf]
+
+Resources of MewPro:
 * Introduction to MewPro: [http://mewpro.cc/?p=226]
-* Schematic Drawing: [http://mewpro.cc/?p=204]
+* Schematic of MewPro: [http://mewpro.cc/?p=204]
 * List of GoPro Serial Commands: [http://mewpro.cc/2014/10/14/list-of-i%C2%B2c-commands/]
 * Herobus Pinout of GoPro Hero 3+ Black: [http://mewpro.cc/?p=207]
 
