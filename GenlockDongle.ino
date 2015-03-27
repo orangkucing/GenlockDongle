@@ -1,5 +1,6 @@
 // GoPro hardware emu (MewPro Genlock Dongle)
 //
+// To comple please use Arduino IDE 1.5.7+
 
 //   Copyright (c) 2015 orangkucing
 
