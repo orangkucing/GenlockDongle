@@ -1,6 +1,6 @@
 // GoPro hardware emu (MewPro Genlock Dongle)
 //
-// To comple please use Arduino IDE 1.5.7+
+// To comple please use Arduino IDE 1.5.7 (or later) and PinChangeInt 2.40-rc2 (or later)
 
 //   Copyright (c) 2015 orangkucing
 
@@ -13,9 +13,9 @@ boolean debug = false;
 // Note: in order to use MewPro Genlock Dongle reliably, THE FOLLOWING MODIFICATIONS TO STANDARD ARDUINO LIBRARY SOURCE IS
 // STRONGLY RECOMMENDED:
 //
-//     1. hardware/arduino/avr/libraries/Wire.h
+//     1. hardware/arduino/avr/libraries/Wire/Wire.h
 //            old: #define BUFFER_LENGTH 32                        -->   new: #define BUFFER_LENGTH 64
-//     2. hardware/arduino/avr/libraries/utility/twi.h
+//     2. hardware/arduino/avr/libraries/Wire/utility/twi.h
 //                 #define TWI_BUFFER_LENGTH 32                    -->   new: #define TWI_BUFFER_LENGTH 64
 #include <Wire.h>
 #if BUFFER_LENGTH < 64
@@ -28,7 +28,7 @@ boolean debug = false;
 
 //********************************************************
 // pin change interrupt
-// please download PinChangeInt library from https://code.google.com/p/arduino-pinchangeint/
+// please download PinChangeInt library from https://github.com/GreyGnome/PinChangeInt
 //
 // You can reduce the memory footprint of this handler by declaring that there will be no pin change interrupts
 // on any one or two of the three ports.  If only a single port remains, the handler will be declared inline
