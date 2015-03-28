@@ -15,7 +15,7 @@ Resources of MewPro:
 ------
 
 ###Compile
-MewPro Genlock Dongle uses Arduino Pro Mini 328 3.3V 8MHz. The source code is checked to compile/work with Arduino IDE 1.5.8+
+MewPro Genlock Dongle uses Arduino Pro Mini 328 3.3V 8MHz. The source code is checked to compile/work with Arduino IDE 1.5.8 (or later) and PinChangeInt 2.40-rc2 (or later)
 
 ------
 
