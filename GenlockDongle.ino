@@ -61,6 +61,9 @@ boolean dontSendPW = false;
 boolean heartBeatIsOn = false;
 boolean isMaster = false;
 
+unsigned long previous_shutter;
+unsigned long timelapse = 0;
+
 void setup() 
 {
   // Remark. Arduino Pro Mini 328 3.3V 8MHz is too slow to catch up with the highest 115200 baud.
@@ -111,6 +114,12 @@ void loop()
     }
   } else {
     lastHeartBeat = millis();
+  }
+  if (timelapse != 0) {
+    if (millis() - previous_shutter >= timelapse) {
+      queueIn("SR3");
+      timelapse = 0;
+    }
   }
   checkCommands();
 }

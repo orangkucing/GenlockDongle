@@ -29,3 +29,28 @@ const int BPRDY            = A3; // (17)   PC3
 #else
 #error CPU not supported
 #endif
+
+const int GET_CAMERA_INFO           = ('c' << 8) + 'v';
+const int GET_CAMERA_WIFI_STATUS    = ('w' << 8) + 'i';
+const int GET_CAMERA_SETTING        = ('t' << 8) + 'd';
+const int SET_CAMERA_SETTING        = ('T' << 8) + 'D';
+const int SET_CAMERA_POWER_STATE    = ('P' << 8) + 'W';
+const int SET_CAMERA_VIDEO_OUTPUT   = ('V' << 8) + 'O';
+const int SET_CAMERA_SLAVE_SETTINGS = ('X' << 8) + 'S';
+const int SET_CAMERA_FAULT          = ('F' << 8) + 'N';
+const int SET_CAMERA_3D_SYNCHRONIZE = ('S' << 8) + 'Y';
+const int SET_CAMERA_SHUTTER_ACTION = ('S' << 8) + 'H';
+
+// commands relating to TD SET_CAMERA_SETTING
+// buffer to store current camera settings
+const int TD_BUFFER_SIZE                    = 0x29;
+
+//
+// td[] meanings and associated bacpac command
+const int TD_MODE                           = 0x09;
+
+#define MODE_VIDEO 0x00
+#define MODE_PHOTO 0x01
+#define MODE_BURST 0x02
+#define MODE_TIMELAPSE 0x03
+#define MODE_DUAL 0x08

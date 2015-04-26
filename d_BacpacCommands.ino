@@ -1,23 +1,7 @@
-#define MEWPRO_VERSION_STRING "2015031400"
+#define MEWPRO_VERSION_STRING "2015042600"
 
-const int GET_CAMERA_INFO           = ('c' << 8) + 'v';
-const int GET_CAMERA_WIFI_STATUS    = ('w' << 8) + 'i';
-const int GET_CAMERA_SETTING        = ('t' << 8) + 'd';
-const int SET_CAMERA_SETTING        = ('T' << 8) + 'D';
-const int SET_CAMERA_POWER_STATE    = ('P' << 8) + 'W';
-const int SET_CAMERA_VIDEO_OUTPUT   = ('V' << 8) + 'O';
-const int SET_CAMERA_SLAVE_SETTINGS = ('X' << 8) + 'S';
-const int SET_CAMERA_FAULT          = ('F' << 8) + 'N';
-const int SET_CAMERA_3D_SYNCHRONIZE = ('S' << 8) + 'Y';
-const int SET_CAMERA_SHUTTER_ACTION = ('S' << 8) + 'H';
-
-byte modes[0x29] = {
+byte td[TD_BUFFER_SIZE] = {
   // default mode below will be overwritten so don't worry about the detailed settings here
-#define MODE_VIDEO 0x00
-#define MODE_PHOTO 0x01
-#define MODE_BURST 0x02
-#define MODE_TIMELAPSE 0x03
-#define MODE_DUAL 0x08
   0x28, 'T', 'D', 0x0f, 0x01, 0x12, 0x03, 0x21,
   0x32, MODE_PHOTO, 0x05, 0xff, 0x03, 0x07, 0x00, 0x00, 
   0x02, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00,
@@ -93,19 +77,19 @@ void cameraCommand()
     // 0x27  0x28   EV SET_BACPAC_PROTUNE_EXPOSURE_VALUE
     // -----+-----+-----------------------------------------------------
   case GET_CAMERA_SETTING:
-    memcpy(buf + 2, modes + 3, 0x25);
+    memcpy(buf + 2, td + 3, TD_BUFFER_SIZE - 3);
     buf[0] = 0x27; buf[1] = 0;
     SendBufToBacpac();
     heartBeatIsOn = true;
     break;
   case SET_CAMERA_SETTING:
     __debug(F("camera settings received"));
-    memcpy(modes, recv, 0x28);
-    if (1) { // send to slaves
+    memcpy(td, recv, TD_BUFFER_SIZE);
+    if (heartBeatIsOn) { // send to slaves
       Serial.print("TD");
-      for (int i = 3; i < 0x29; i++) {
+      for (int i = 3; i < TD_BUFFER_SIZE; i++) {
         char tmp[2];
-        sprintf(tmp, "%02X", modes[i]);
+        sprintf(tmp, "%02X", td[i]);
         Serial.print(tmp);
       }
       Serial.println("");
@@ -146,7 +130,7 @@ void cameraCommand()
   case SET_CAMERA_POWER_STATE:
     if (recv[3] == 0) {
       if (!dontSendPW) { 
-        if (1) { // send to slaves
+        if (heartBeatIsOn) { // send to slaves
           Serial.println(F("PW00"));
         }
         digitalWrite(BUILTINLED, HIGH);
@@ -197,19 +181,31 @@ void cameraCommand()
     // Master shutter button depressed
     {
       char tmp[3];
-      if (1) { // send to slaves
+      if (heartBeatIsOn) { // send to slaves
         sprintf(tmp, "SY%02X", recv[3]);
         digitalWrite(BUILTINLED, HIGH);
         Serial.println(tmp);
         digitalWrite(BUILTINLED, LOW);
       }
-      if (!isMaster && recv[3] == 0) {
+      buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
+      if (!isMaster && recv[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
         // video capture end
-        sprintf(tmp, "SR03"); // notify video saved
+        buf[3] = 3; // notify video saved
       } else {
-        sprintf(tmp, "SR%02X", recv[3]);
+        buf[3] = recv[3];
       }
-      queueIn(tmp);
+      SendBufToBacpac();
+      if (td[TD_MODE] == MODE_TIMELAPSE) {
+        switch (recv[3]) {
+        case 1:
+        case 2:
+          timelapse = 1900;
+          break;
+        default:
+          timelapse = 0;
+        }
+        previous_shutter = millis();
+      }
     }
     break;
   default:
