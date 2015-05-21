@@ -48,6 +48,7 @@ const int TD_BUFFER_SIZE                    = 0x29;
 //
 // td[] meanings and associated bacpac command
 const int TD_MODE                           = 0x09;
+const int TD_FLIP_MIRROR                    = 0x23;
 
 #define MODE_VIDEO 0x00
 #define MODE_PHOTO 0x01

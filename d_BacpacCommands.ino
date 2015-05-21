@@ -85,6 +85,9 @@ void cameraCommand()
   case SET_CAMERA_SETTING:
     __debug(F("camera settings received"));
     memcpy(td, recv, TD_BUFFER_SIZE);
+    // Upside is always up
+    td[TD_FLIP_MIRROR] = 1;
+    //
     if (heartBeatIsOn) { // send to slaves
       Serial.print("TD");
       for (int i = 3; i < TD_BUFFER_SIZE; i++) {
