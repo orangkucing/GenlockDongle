@@ -247,12 +247,7 @@ void _I2CmasterRead()
   int datalen;
   // since data length is variable and not yet known, read one byte first.
   WIRE.requestFrom(SMARTY, 1, I2C_NOSTOP);
-  if (WIRE.available()) {
-    datalen = WIRE.read() & 0x7f;
-  } else {
-    // panic! error
-    datalen = -1;
-  }
+  datalen = WIRE.read() & 0x7f;
   // request again
   WIRE.requestFrom(SMARTY, datalen + 1, I2C_STOP);
   for (int i = 0; i <= datalen; i++) {
