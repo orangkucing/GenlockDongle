@@ -240,6 +240,10 @@ void readEEPROM()
   if (debug) {
     Serial.println("");
   }
+  // notify SMARTY that ROM has read successfully
+  digitalWrite(PWRBTN, LOW); pinMode(PWRBTN, OUTPUT);
+  delay(200);
+  pinMode(PWRBTN, INPUT_PULLUP);
 }
 
 void _I2CmasterRead()
