@@ -89,6 +89,9 @@ void loop()
   if (digitalRead(BPRDY) == LOW && digitalRead(PWRBTN) == LOW) { // slave: power button of main camera depressed
     pwrbtn = false;
     delayMicroseconds(10500);
+    while (digitalRead(PWRBTN) == LOW) {
+      ;
+    }
   } else if (!pwrbtn) {
     emptyQueue();
     pwrbtn = true;
