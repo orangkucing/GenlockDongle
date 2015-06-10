@@ -190,6 +190,8 @@ void cameraCommand()
         Serial.println(tmp);
         digitalWrite(BUILTINLED, LOW);
       }
+      // in order to sync the first frame, a short delay seems to be necessary
+      delay(140); // 140ms
       buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
       if (!isMaster && recv[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
         // video capture end
