@@ -6,6 +6,7 @@ volatile int queueb = 0, queuee = 0;
 void emptyQueue()
 {
   queueb = queuee = 0;
+  Serial.flush(); // clear receive buffer
 }
 
 boolean inputAvailable()
