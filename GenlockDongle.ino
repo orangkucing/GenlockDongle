@@ -49,6 +49,9 @@ boolean debug = false;
 #define DISABLE_PCINT_MULTI_SERVICE
 #include <PinChangeInt.h>
 
+// it is better to define this when RXI is connected to nothing (eg. Dongle #1 of Genlock system)
+#undef  UART_RECEIVER_DISABLE
+
 // end of Options
 //////////////////////////////////////////////////////////
 
@@ -70,7 +73,10 @@ void setup()
   //     cf. http://forum.arduino.cc/index.php?topic=54623.0
   // Set 57600 baud or slower.
   Serial.begin(57600);
-  
+#ifdef UART_RECEIVER_DISABLE
+  UCSR0B &= (~_BV(RXEN0));
+#endif
+
   pinMode(BPRDY, INPUT_PULLUP);
   pinMode(PWRBTN, INPUT_PULLUP);
   digitalWrite(HBUSRDY, LOW);
