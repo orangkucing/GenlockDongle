@@ -49,7 +49,7 @@ boolean debug = false;
 #define DISABLE_PCINT_MULTI_SERVICE
 #include <PinChangeInt.h>
 
-// it is better to define this when RXI is connected to nothing (eg. Dongle #1 of Genlock system)
+// it is better to define this when RXI is connected to nothing (eg. Dongle #1 of single dongle configuration or Dongle #0)
 #undef  UART_RECEIVER_DISABLE
 
 // end of Options
