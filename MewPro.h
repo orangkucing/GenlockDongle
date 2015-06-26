@@ -40,6 +40,7 @@ const int SET_CAMERA_SLAVE_SETTINGS = ('X' << 8) + 'S';
 const int SET_CAMERA_FAULT          = ('F' << 8) + 'N';
 const int SET_CAMERA_3D_SYNCHRONIZE = ('S' << 8) + 'Y';
 const int SET_CAMERA_SHUTTER_ACTION = ('S' << 8) + 'H';
+const int SET_BACPAC_SHUTTER_ACTION = ('S' << 8) + 'H';
 
 // commands relating to TD SET_CAMERA_SETTING
 // buffer to store current camera settings
