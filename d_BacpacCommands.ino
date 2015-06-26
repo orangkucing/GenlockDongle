@@ -1,4 +1,4 @@
-#define MEWPRO_VERSION_STRING "2015062600"
+#define MEWPRO_VERSION_STRING "2015062601"
 
 byte td[TD_BUFFER_SIZE] = {
   // default mode below will be overwritten so don't worry about the detailed settings here
@@ -91,7 +91,7 @@ void cameraCommand()
     if (heartBeatIsOn) { // send to slaves
       Serial.print("TD");
       for (int i = 3; i < TD_BUFFER_SIZE; i++) {
-        char tmp[2];
+        char tmp[3];
         sprintf(tmp, "%02X", td[i]);
         Serial.print(tmp);
       }
@@ -182,7 +182,7 @@ void cameraCommand()
   case SET_CAMERA_3D_SYNCHRONIZE:
     // Master shutter button depressed
     {
-      char tmp[3];
+      char tmp[5];
       if (heartBeatIsOn) { // send to slaves
         sprintf(tmp, "SY%02X", recv[3]);
         digitalWrite(BUILTINLED, HIGH);
@@ -219,7 +219,7 @@ void cameraCommand()
 
 void readEEPROM()
 {
-  char c, tmp[2];
+  char c, tmp[4];
   if (debug) {
     Serial.print(F("eeprom:"));
   }

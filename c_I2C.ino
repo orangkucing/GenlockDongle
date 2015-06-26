@@ -52,8 +52,21 @@ void _printInput()
 }
 
 void SendBufToBacpac() {
+  // some command need to be executed in Dongle side before sending it to Bacpac
   int buflen = buf[0] & 0x7f;
-  
+  int command = (buf[1] << 8) + buf[2];
+  switch (command) {
+  case SET_CAMERA_USBMODE:
+    if (heartBeatIsOn) { // send to slaves
+      char tmp[5];
+      sprintf(tmp, "UM%02X", buf[3]);
+      Serial.print(tmp);
+      Serial.println("");
+    }
+    return; // not send to Bacpac as "UM" is not a SET_BACPAC_* command
+  default:
+    break;
+  }
   dontSendPW = false;
   if (debug) {
     Serial.print('<');
