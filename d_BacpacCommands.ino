@@ -89,9 +89,9 @@ void cameraCommand()
     td[TD_FLIP_MIRROR] = 1;
     //
     if (heartBeatIsOn) { // send to slaves
+      char tmp[3];
       Serial.print("TD");
       for (int i = 3; i < TD_BUFFER_SIZE; i++) {
-        char tmp[3];
         sprintf(tmp, "%02X", td[i]);
         Serial.print(tmp);
       }

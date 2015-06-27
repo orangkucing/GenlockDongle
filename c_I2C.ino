@@ -60,8 +60,7 @@ void SendBufToBacpac() {
     if (heartBeatIsOn) { // send to slaves
       char tmp[5];
       sprintf(tmp, "UM%02X", buf[3]);
-      Serial.print(tmp);
-      Serial.println("");
+      Serial.println(tmp);
     }
     return; // not send to Bacpac as "UM" is not a SET_BACPAC_* command
   default:
