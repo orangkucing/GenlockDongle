@@ -6,7 +6,11 @@ volatile int queueb = 0, queuee = 0;
 void emptyQueue()
 {
   queueb = queuee = 0;
-  Serial.flush(); // clear receive buffer
+  // empty serial receive buffer
+  UCSR0B &= (~_BV(RXEN0)); // disable receiver
+#ifndef UART_RECEIVER_DISABLE
+  UCSR0B |= _BV(RXEN0); // enable receiver
+#endif
 }
 
 boolean inputAvailable()
@@ -25,11 +29,7 @@ byte myRead()
     queueb = (queueb + 1) % MEWPRO_BUFFER_LENGTH;
     return c;
   }
-  int b = Serial.read();
-  if (b != -1) {
-    Serial.write(b); // send to slaves
-  }
-  return b;
+  return Serial.read();
 }
 
 // Utility functions

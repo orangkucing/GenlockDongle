@@ -63,6 +63,17 @@ void SendBufToBacpac() {
       Serial.println(tmp);
     }
     return; // not send to Bacpac as "UM" is not a SET_BACPAC_* command
+  case SET_CAMERA_SETTING:
+    if (heartBeatIsOn) { // send to slaves
+      char tmp[3];
+      Serial.print("TD");
+      for (int i = 3; i < TD_BUFFER_SIZE; i++) {
+        sprintf(tmp, "%02X", buf[i]);
+        Serial.print(tmp);
+      }
+      Serial.println("");
+    }
+    return; // not send to Bacpac as "TD" is not a SET_BACPAC_* command
   default:
     break;
   }
