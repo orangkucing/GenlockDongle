@@ -11,6 +11,16 @@ volatile boolean recvq = false;
 const int I2CEEPROM = 0x50;
 const int SMARTY = 0x60;
 
+byte td[TD_BUFFER_SIZE] = {
+  // default mode below will be overwritten so don't worry about the detailed settings here
+  0x28, 'T', 'D', 0x0f, 0x01, 0x12, 0x03, 0x21,
+  0x32, MODE_VIDEO, 0x05, 0xff, 0x03, 0x07, 0x00, 0x00, 
+  0x02, 0x00, 0x02, 0x00, 0x01, 0x02, 0x00, 0x00,
+  0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+  0x0a,
+};
+
 void readHandler()
 {
   recvq = true;
@@ -66,6 +76,7 @@ void SendBufToBacpac() {
   case SET_CAMERA_SETTING:
     if (heartBeatIsOn) { // send to slaves
       char tmp[3];
+      memcpy(td, buf, TD_BUFFER_SIZE);
       Serial.print("TD");
       for (int i = 3; i < TD_BUFFER_SIZE; i++) {
         sprintf(tmp, "%02X", buf[i]);
@@ -73,7 +84,7 @@ void SendBufToBacpac() {
       }
       Serial.println("");
     }
-    break;
+    break; // Bacpac understands "TD"
   default:
     break;
   }
