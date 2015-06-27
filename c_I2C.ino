@@ -73,7 +73,7 @@ void SendBufToBacpac() {
       }
       Serial.println("");
     }
-    return; // not send to Bacpac as "TD" is not a SET_BACPAC_* command
+    break;
   default:
     break;
   }
