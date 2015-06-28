@@ -143,6 +143,7 @@ void cameraCommand()
     case 0x03:
       __debug(F("No SD"));
       break;
+    case 0x04:
     case 0x05:
       __debug(F("cameras incompatible"));
       break;
@@ -202,6 +203,7 @@ void cameraCommand()
       }
     }
     break;
+  case 0: // varidation string
   default:
     break;
   }

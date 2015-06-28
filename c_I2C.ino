@@ -101,9 +101,14 @@ void SendBufToBacpac() {
 void resetI2C()
 {
   WIRE.begin();
-  pinMode(I2CINT, INPUT_PULLUP);
-  attachPinChangeInterrupt(I2CINT, readHandler, FALLING); 
+  digitalWrite(I2CINT, LOW);
+  pinMode(I2CINT, OUTPUT);
   recvq = false;
+  readEEPROM();
+  queueIn("vs");
+  delay(1000);
+  attachPinChangeInterrupt(I2CINT, readHandler, FALLING); 
+  pinMode(I2CINT, INPUT_PULLUP);
 }
 
 // SET_CAMERA_3D_SYNCHRONIZE START_RECORD

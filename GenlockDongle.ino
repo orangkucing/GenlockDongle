@@ -112,8 +112,6 @@ void loop()
     digitalWrite(BUILTINLED, LOW);
     digitalWrite(HBUSRDY, HIGH);
     resetI2C();
-    readEEPROM();
-    queueIn("vs");
     poweron = false;
   }
   if (heartBeatIsOn) {
