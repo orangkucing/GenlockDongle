@@ -1,10 +1,10 @@
-#define MEWPRO_VERSION_STRING "2015062601"
+#define MEWPRO_VERSION_STRING "2015091800"
 
 void cameraCommand()
 {
   switch ((recv[1] << 8) + recv[2]) {
   case GET_CAMERA_INFO:
-    memcpy((char *)buf, "\x25\x00\x01\x04\x0cHD3.11.03.00\x14HERO3+ Black Edition", 0x26); // the dongle will act as a HERO3+ Black
+    memcpy((char *)buf, "\x25\x00\x01\x04\x0cHD3.11.03.03\x14HERO3+ Black Edition", 0x26); // the dongle will act as a HERO3+ Black
     // memcpy((char *)buf, "\x20\x00\x01\x04\x0fHD4.01.02.00.00\x0cHERO4 Silver", 0x21); // not supported yet
     // memcpy((char *)buf, "\x1f\x00\x01\x04\x0fHD4.02.02.00.00\x0bHERO4 Black", 0x20); // not supported yet
     SendBufToBacpac();
