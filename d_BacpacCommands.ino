@@ -1,4 +1,4 @@
-#define MEWPRO_VERSION_STRING "2015091800"
+#define MEWPRO_VERSION_STRING "2015100800"
 
 void cameraCommand()
 {
@@ -123,9 +123,7 @@ void cameraCommand()
   case SET_CAMERA_POWER_STATE:
     if (recv[3] == 0) {
       if (!dontSendPW) { 
-        if (heartBeatIsOn) { // send to slaves
-          Serial.println(F("PW00"));
-        }
+        Serial.println(F("PW00"));
         digitalWrite(BUILTINLED, HIGH);
         digitalWrite(HBUSRDY, LOW);
       }

@@ -5,7 +5,7 @@
 //   Copyright (c) 2015 orangkucing
 
 // enable console output
-boolean debug = false;
+boolean debug = true;
 
 //********************************************************
 // c_I2C: I2C interface
