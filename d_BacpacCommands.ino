@@ -155,6 +155,9 @@ void cameraCommand()
       delay(200);
       digitalWrite(HBUSRDY, HIGH);
       return;
+    case 0x0a:
+      __debug(F("microSD write error received")); // ??
+      break;
     case 0x0b:
       __debug(F("capture end received"));
       break;

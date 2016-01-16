@@ -86,6 +86,13 @@ void SendBufToBacpac() {
     }
     break; // Bacpac understands "TD"
   default:
+    // other commands are listed in tdtable[]
+    for (int offset = 0x09; offset < TD_BUFFER_SIZE; offset++) {
+      if (pgm_read_word(tdtable + offset - 0x09) == command) {
+        td[offset] = buf[3];
+        break;
+      }
+    }
     break;
   }
   dontSendPW = false;
