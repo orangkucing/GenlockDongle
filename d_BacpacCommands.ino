@@ -1,5 +1,16 @@
 #define MEWPRO_VERSION_STRING "2015100800"
 
+void _sendTD()
+{
+  char tmp[3];
+  Serial.print("TD");
+  for (int i = 3; i < TD_BUFFER_SIZE; i++) {
+    sprintf(tmp, "%02X", td[i]);
+    Serial.print(tmp);
+  }
+  Serial.println("");
+}
+
 void cameraCommand()
 {
   switch ((recv[1] << 8) + recv[2]) {
@@ -70,6 +81,9 @@ void cameraCommand()
     memcpy(buf + 2, td + 3, TD_BUFFER_SIZE - 3);
     buf[0] = 0x27; buf[1] = 0;
     SendBufToBacpac();
+    if (1) { // send to slaves
+      _sendTD();
+    }
     heartBeatIsOn = true;
     break;
   case SET_CAMERA_SETTING:
@@ -79,13 +93,7 @@ void cameraCommand()
     td[TD_FLIP_MIRROR] = 1;
     //
     if (heartBeatIsOn) { // send to slaves
-      char tmp[3];
-      Serial.print("TD");
-      for (int i = 3; i < TD_BUFFER_SIZE; i++) {
-        sprintf(tmp, "%02X", td[i]);
-        Serial.print(tmp);
-      }
-      Serial.println("");
+      _sendTD();
     }
     buf[0] = 1; buf[1] = 0; // ok
     SendBufToBacpac();
@@ -175,14 +183,10 @@ void cameraCommand()
     // Master shutter button depressed
     {
       char tmp[5];
-      if (heartBeatIsOn) { // send to slaves
+      if (1) { // send to slaves
         sprintf(tmp, "SY%02X", recv[3]);
-        digitalWrite(BUILTINLED, HIGH);
         Serial.println(tmp);
-        digitalWrite(BUILTINLED, LOW);
       }
-      // in order to sync the first frame, a short delay seems to be necessary
-      delay(140); // 140ms
       buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
       if (!isMaster && recv[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
         // video capture end
@@ -213,22 +217,36 @@ void cameraCommand()
 void readEEPROM()
 {
   char c, tmp[4];
+  int i;
   if (debug) {
     Serial.print(F("eeprom:"));
   }
-  for (int i = 0; i < 16; i++) {
+readEEPROM_RETRY:
+  for (i = 0; i < 16; i++) {
     WIRE.beginTransmission(I2CEEPROM);
     WIRE.write((byte)i);
     WIRE.endTransmission(I2C_NOSTOP);
     WIRE.requestFrom(I2CEEPROM, 1, I2C_STOP);
     if (WIRE.available()) {
       c = WIRE.read();
-      if (i == 0)
-        isMaster = (c == 4);
+      if (i == 0) {
+        switch (c) {
+        case 4:
+          isMaster = true;
+          break;
+        case 5:
+          isMaster = false;
+          break;
+        default:
+          goto readEEPROM_RETRY;
+        }
+      }
       sprintf(tmp, " %02x", c);
       if (debug) {
         Serial.print(tmp);
       }
+    } else {
+      goto readEEPROM_RETRY;
     }
   }
   if (debug) {
@@ -243,13 +261,16 @@ void readEEPROM()
 void _I2CmasterRead()
 {
   int datalen;
-  // since data length is variable and not yet known, read one byte first.
-  WIRE.requestFrom(SMARTY, 1, I2C_NOSTOP);
-  datalen = WIRE.read() & 0x7f;
-  // request again
-  WIRE.requestFrom(SMARTY, datalen + 1, I2C_STOP);
-  for (int i = 0; i <= datalen; i++) {
-    recv[i] = WIRE.read();
+  int i = 1;
+  WIRE.requestFrom(SMARTY, TD_BUFFER_SIZE, I2C_NOSTOP);
+  if (WIRE.available()) {
+    recv[0] = WIRE.read();
+  } else {
+    return;
+  }
+  datalen = recv[0] & 0x7f;
+  while (datalen-- && WIRE.available()) {
+    recv[i++] = WIRE.read();
   }
   recvq = false;
   _printInput();
@@ -329,7 +350,7 @@ void SendHeartBeat()
 {
   buf[0] = 0x83; buf[1] = 'H'; buf[2] = 'B'; buf[3] = 0xff;
   SendBufToBacpac();
-  if (!isMaster) {
+//if (!isMaster) {
 //    queueIn("XS0202011D000001E3000404FFFF00"); if wifi on
-  }
+//}
 }
