@@ -55,7 +55,6 @@ boolean debug = false;
 // end of Options
 //////////////////////////////////////////////////////////
 
-#include <string.h>
 #include <Arduino.h>
 #include "MewPro.h"
 

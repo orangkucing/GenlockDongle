@@ -44,10 +44,8 @@ void __printBuf(byte *p)
         Serial.print(' ');
       }
       Serial.print((char) p[i]);
-    } else {
-      char tmp[4];
-      sprintf(tmp, " %02x", p[i]);
-      Serial.print(tmp);
+    } else {  
+      printHex(p[i], true);
     }
   }
   Serial.println("");
@@ -68,9 +66,9 @@ void SendBufToBacpac() {
   switch (command) {
   case SET_CAMERA_USBMODE:
     if (heartBeatIsOn) { // send to slaves
-      char tmp[5];
-      sprintf(tmp, "UM%02X", buf[3]);
-      Serial.println(tmp);
+      Serial.print("UM");
+      printHex(buf[3], true);
+      Serial.println("");
     }
     return; // not send to Bacpac as "UM" is not a SET_BACPAC_* command
   case SET_CAMERA_SETTING:
@@ -79,8 +77,7 @@ void SendBufToBacpac() {
       memcpy(td, buf, TD_BUFFER_SIZE);
       Serial.print("TD");
       for (int i = 3; i < TD_BUFFER_SIZE; i++) {
-        sprintf(tmp, "%02X", buf[i]);
-        Serial.print(tmp);
+        printHex(buf[i], true);
       }
       Serial.println("");
     }

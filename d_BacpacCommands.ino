@@ -1,12 +1,26 @@
-#define MEWPRO_VERSION_STRING "2016020200"
+#define MEWPRO_VERSION_STRING "2016020300"
+
+void printHex(uint8_t d, boolean upper)
+{
+  char t;
+  char a = upper ? 'A' : 'a';
+  t = d >> 4 | '0';
+  if (t > '9') {
+    t += a - '9' - 1;
+  }
+  Serial.print(t);
+  t = d & 0xF | '0';
+  if (t > '9') {
+    t += a - '9' - 1;
+  }
+  Serial.print(t);
+}
 
 void _sendTD()
 {
-  char tmp[3];
   Serial.print("TD");
   for (int i = 3; i < TD_BUFFER_SIZE; i++) {
-    sprintf(tmp, "%02X", td[i]);
-    Serial.print(tmp);
+    printHex(td[i], true);
   }
   Serial.println("");
 }
@@ -181,31 +195,29 @@ void cameraCommand()
     break;
   case SET_CAMERA_3D_SYNCHRONIZE:
     // Master shutter button depressed
-    {
-      char tmp[5];
-      if (1) { // send to slaves
-        sprintf(tmp, "SY%02X", recv[3]);
-        Serial.println(tmp);
+    if (1) { // send to slaves
+      Serial.print("SY");
+      printHex(recv[3], true);
+      Serial.println("");
+    }
+    buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
+    if (!isMaster && recv[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
+      // video capture end
+      buf[3] = 3; // notify video saved
+    } else {
+      buf[3] = recv[3];
+    }
+    SendBufToBacpac();
+    if (td[TD_MODE] == MODE_TIMELAPSE) {
+      switch (recv[3]) {
+      case 1:
+      case 2:
+        timelapse = 1900;
+        break;
+      default:
+        timelapse = 0;
       }
-      buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
-      if (!isMaster && recv[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
-        // video capture end
-        buf[3] = 3; // notify video saved
-      } else {
-        buf[3] = recv[3];
-      }
-      SendBufToBacpac();
-      if (td[TD_MODE] == MODE_TIMELAPSE) {
-        switch (recv[3]) {
-        case 1:
-        case 2:
-          timelapse = 1900;
-          break;
-        default:
-          timelapse = 0;
-        }
-        previous_shutter = millis();
-      }
+      previous_shutter = millis();
     }
     break;
   case 0: // varidation string
@@ -216,7 +228,7 @@ void cameraCommand()
 
 void readEEPROM()
 {
-  char c, tmp[4];
+  char c;
   int i;
   if (debug) {
     Serial.print(F("eeprom:"));
@@ -241,9 +253,9 @@ readEEPROM_RETRY:
           goto readEEPROM_RETRY;
         }
       }
-      sprintf(tmp, " %02x", c);
       if (debug) {
-        Serial.print(tmp);
+        Serial.print(" ");
+        printHex(c, false);
       }
     } else {
       goto readEEPROM_RETRY;
