@@ -44,8 +44,9 @@ void __printBuf(byte *p)
         Serial.print(' ');
       }
       Serial.print((char) p[i]);
-    } else {  
-      printHex(p[i], true);
+    } else {
+      Serial.print(" ");
+      printHex(p[i], false);
     }
   }
   Serial.println("");

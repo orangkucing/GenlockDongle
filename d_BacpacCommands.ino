@@ -1,4 +1,4 @@
-#define MEWPRO_VERSION_STRING "2016020300"
+#define MEWPRO_VERSION_STRING "2016020301"
 
 void printHex(uint8_t d, boolean upper)
 {
