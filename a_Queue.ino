@@ -2,10 +2,12 @@
 
 byte queue[MEWPRO_BUFFER_LENGTH];
 volatile int queueb = 0, queuee = 0;
+boolean serialfirst = false;
 
 void emptyQueue()
 {
   queueb = queuee = 0;
+  serialfirst = false;
   // empty serial receive buffer
   UCSR0B &= (~_BV(RXEN0)); // disable receiver
 #ifndef UART_RECEIVER_DISABLE
@@ -23,12 +25,17 @@ boolean inputAvailable()
 
 byte myRead()
 {
+  if (serialfirst && Serial.available()) {
+    return Serial.read();
+  }
   if (queueb != queuee) {
     byte c;
     c = queue[queueb];
     queueb = (queueb + 1) % MEWPRO_BUFFER_LENGTH;
+    serialfirst = false;
     return c;
   }
+  serialfirst = true;
   return Serial.read();
 }
 

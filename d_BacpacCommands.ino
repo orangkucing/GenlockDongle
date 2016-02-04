@@ -1,4 +1,4 @@
-#define MEWPRO_VERSION_STRING "2016020301"
+#define MEWPRO_VERSION_STRING "2016020402"
 
 void printHex(uint8_t d, boolean upper)
 {
@@ -14,15 +14,6 @@ void printHex(uint8_t d, boolean upper)
     t += a - '9' - 1;
   }
   Serial.print(t);
-}
-
-void _sendTD()
-{
-  Serial.print("TD");
-  for (int i = 3; i < TD_BUFFER_SIZE; i++) {
-    printHex(td[i], true);
-  }
-  Serial.println("");
 }
 
 void cameraCommand()
@@ -95,9 +86,6 @@ void cameraCommand()
     memcpy(buf + 2, td + 3, TD_BUFFER_SIZE - 3);
     buf[0] = 0x27; buf[1] = 0;
     SendBufToBacpac();
-    if (1) { // send to slaves
-      _sendTD();
-    }
     heartBeatIsOn = true;
     break;
   case SET_CAMERA_SETTING:
@@ -107,7 +95,11 @@ void cameraCommand()
     td[TD_FLIP_MIRROR] = 1;
     //
     if (heartBeatIsOn) { // send to slaves
-      _sendTD();
+      Serial.print("TD");
+      for (int i = 3; i < TD_BUFFER_SIZE; i++) {
+        printHex(td[i], true);
+      }
+      Serial.println("");
     }
     buf[0] = 1; buf[1] = 0; // ok
     SendBufToBacpac();
@@ -302,6 +294,7 @@ void checkCommands()
         continue;
       case '\r':
       case '\n':
+        serialfirst = false;
         if (bufp != 1) {
           buf[0] = bufp - 1 | 0x80;
           bufp = 1;
@@ -311,6 +304,7 @@ void checkCommands()
       case '&':
         bufp = 1;
         debug = !debug;
+        serialfirst = false;
         __debug(F("debug messages on"));
         while (inputAvailable()) {
           if (myRead() == '\n') {
@@ -320,6 +314,7 @@ void checkCommands()
         return;  
       case '@':
         bufp = 1;
+        serialfirst = false;
         __debug(F("camera power on"));
         poweron = true;
         if (1) {
@@ -333,6 +328,7 @@ void checkCommands()
         }
         return; 
       case '/':
+        serialfirst = false;
         Serial.println(MEWPRO_VERSION_STRING);
         return; 
       default:
