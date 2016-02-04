@@ -18,7 +18,7 @@ void printHex(uint8_t d, boolean upper)
 
 void cameraCommand()
 {
-  switch ((recv[1] << 8) + recv[2]) {
+  switch ((RECV(1) << 8) + RECV(2)) {
   case GET_CAMERA_INFO:
     memcpy((char *)buf, "\x25\x00\x01\x04\x0cHD3.11.03.03\x14HERO3+ Black Edition", 0x26); // the dongle will act as a HERO3+ Black
     // memcpy((char *)buf, "\x20\x00\x01\x04\x0fHD4.01.02.00.00\x0cHERO4 Silver", 0x21); // not supported yet
@@ -36,7 +36,7 @@ void cameraCommand()
 /*********************************************************************
  data structure for {GET|SET}_CAMERA_SETTING is the same as follows: */
     //
-    // buf[] recv[] meaning and/or relating bacpac command
+    // buf[] RECV() meaning and/or relating bacpac command
     // -----+-----+-----------------------------------------------------
     // 0x00  0x00   packet length (0x27 or 0x28)
     // 0x01         always 0
@@ -90,7 +90,9 @@ void cameraCommand()
     break;
   case SET_CAMERA_SETTING:
     __debug(F("camera settings received"));
-    memcpy(td, recv, TD_BUFFER_SIZE);
+    for (int i = 0; i < TD_BUFFER_SIZE; i++) {
+      td[i] = RECV(i);
+    }
     // Upside is always up
     td[TD_FLIP_MIRROR] = 1;
     //
@@ -113,14 +115,14 @@ void cameraCommand()
     break;
  /*********************************************************************/
   case SET_CAMERA_VIDEO_OUTPUT:
-    buf[0] = 2; buf[1] = 0; buf[2] = recv[3];
+    buf[0] = 2; buf[1] = 0; buf[2] = RECV(3);
     SendBufToBacpac();
     break;
   case SET_CAMERA_SLAVE_SETTINGS:
     if (isMaster) {
       // received slave camera configurations
     } else {
-      switch (recv[3]) {
+      switch (RECV(3)) {
       case 0:
         heartBeatIsOn = false;
         break;
@@ -135,7 +137,7 @@ void cameraCommand()
     SendBufToBacpac();
     break;
   case SET_CAMERA_POWER_STATE:
-    if (recv[3] == 0) {
+    if (RECV(3) == 0) {
       if (!dontSendPW) { 
         Serial.println(F("PW00")); // send to slaves
         digitalWrite(BUILTINLED, HIGH);
@@ -146,12 +148,12 @@ void cameraCommand()
     }
     break;
   case SET_CAMERA_FAULT:
-    switch (recv[3]) {
+    switch (RECV(3)) {
     case 0x01:
       __debug(F("low battery"));
       buf[0] = 1; buf[1] = 0;
       SendBufToBacpac();
-      return;
+      goto commandError;
     case 0x03:
       __debug(F("No SD"));
       break;
@@ -168,7 +170,7 @@ void cameraCommand()
       digitalWrite(HBUSRDY, LOW); // show bacpac as if the camera has rebooted
       delay(200);
       digitalWrite(HBUSRDY, HIGH);
-      return;
+      goto commandError;
     case 0x0a:
       __debug(F("microSD write error received")); // ??
       break;
@@ -182,26 +184,26 @@ void cameraCommand()
       __debug(F("Unknown notification received"));
       break;
     }
-    buf[0] = 2; buf[1] = 0; buf[2] = recv[3]; // "ok"
+    buf[0] = 2; buf[1] = 0; buf[2] = RECV(3); // "ok"
     SendBufToBacpac();
     break;
   case SET_CAMERA_3D_SYNCHRONIZE:
     // Master shutter button depressed
     if (1) { // send to slaves
       Serial.print("SY");
-      printHex(recv[3], true);
+      printHex(RECV(3), true);
       Serial.println("");
     }
     buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
-    if (!isMaster && recv[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
+    if (!isMaster && RECV(3) == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
       // video capture end
       buf[3] = 3; // notify video saved
     } else {
-      buf[3] = recv[3];
+      buf[3] = RECV(3);
     }
     SendBufToBacpac();
     if (td[TD_MODE] == MODE_TIMELAPSE) {
-      switch (recv[3]) {
+      switch (RECV(3)) {
       case 1:
       case 2:
         timelapse = 1900;
@@ -216,6 +218,8 @@ void cameraCommand()
   default:
     break;
   }
+commandError:
+  recvb = (recvb + (recv[recvb] & 0x7F) + 1) % MEWPRO_BUFFER_LENGTH;
 }
 
 void readEEPROM()
@@ -268,21 +272,22 @@ void _I2CmasterRead()
   int i = 1;
   WIRE.requestFrom(SMARTY, TD_BUFFER_SIZE, I2C_NOSTOP);
   if (WIRE.available()) {
-    recv[0] = WIRE.read();
+    recv[recve] = WIRE.read();
   } else {
     return;
   }
-  datalen = recv[0] & 0x7f;
+  datalen = recv[recve] & 0x7f;
   while (datalen-- && WIRE.available()) {
-    recv[i++] = WIRE.read();
+    recv[(recve + i++) % MEWPRO_BUFFER_LENGTH] = WIRE.read();
   }
-  recvq = false;
-  _printInput();
+  _printInput(recve);
+  recve = (recve + i) % MEWPRO_BUFFER_LENGTH;
 }
 
 void checkCommands()
 {
   if (recvq) {
+    recvq = false;
     _I2CmasterRead();
     cameraCommand();
   }

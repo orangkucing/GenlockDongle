@@ -5,7 +5,9 @@
 
 byte buf[MEWPRO_BUFFER_LENGTH], recv[MEWPRO_BUFFER_LENGTH];
 int bufp = 1;
-volatile boolean recvq = false;
+int recvb = 0, recve = 0;
+volatile boolean recvq;
+#define RECV(a) (recv[(recvb + (a)) % MEWPRO_BUFFER_LENGTH])
 
 // I2C slave addresses
 const int I2CEEPROM = 0x50;
@@ -34,29 +36,23 @@ void __debug(const __FlashStringHelper *p)
   }
 }
 
-void __printBuf(byte *p)
-{
-  int buflen = p[0] & 0x7f;
-
-  for (int i = 0; i <= buflen; i++) {
-    if (i == 1 && isprint(p[1]) || i == 2 && p[1] != 0 && isprint(p[2])) {
-      if (i == 1) {
-        Serial.print(' ');
-      }
-      Serial.print((char) p[i]);
-    } else {
-      Serial.print(" ");
-      printHex(p[i], false);
-    }
-  }
-  Serial.println("");
-}
-
-void _printInput()
+void _printInput(int b)
 {
   if (debug) {
+    int buflen = recv[b] & 0x7f;
     Serial.print('>');
-    __printBuf(recv);
+    for (int i = 0; i <= buflen; i++) {
+      if (i == 1 && isprint(recv[(b + 1) % MEWPRO_BUFFER_LENGTH]) || i == 2 && recv[(b + 1) % MEWPRO_BUFFER_LENGTH] != 0 && isprint(recv[(b + 2) % MEWPRO_BUFFER_LENGTH])) {
+        if (i == 1) {
+          Serial.print(' ');
+        }
+        Serial.print((char) recv[(b + i) % MEWPRO_BUFFER_LENGTH]);
+      } else {
+        Serial.print(" ");
+        printHex(recv[(b + i) % MEWPRO_BUFFER_LENGTH], false);
+      }
+    }
+    Serial.println("");
   }
 }
 
@@ -95,8 +91,20 @@ void SendBufToBacpac() {
   }
   dontSendPW = false;
   if (debug) {
+    int buflen = buf[0] & 0x7f;
     Serial.print('<');
-    __printBuf(buf);
+    for (int i = 0; i <= buflen; i++) {
+      if (i == 1 && isprint(buf[1]) || i == 2 && buf[1] != 0 && isprint(buf[2])) {
+        if (i == 1) {
+          Serial.print(' ');
+        }
+        Serial.print((char) buf[i]);
+      } else {
+        Serial.print(" ");
+        printHex(buf[i], false);
+      }
+    }
+    Serial.println("");
   }
   WIRE.beginTransmission(SMARTY);
   WIRE.write(buf, buflen + 1);
@@ -108,7 +116,7 @@ void resetI2C()
   WIRE.begin();
   digitalWrite(I2CINT, LOW);
   pinMode(I2CINT, OUTPUT);
-  recvq = false;
+  recvb = 0; recve = 0;
   readEEPROM();
   queueIn("vs");
   delay(1000);
