@@ -271,7 +271,7 @@ void _I2CmasterRead()
 {
   int datalen;
   int i = 1;
-  WIRE.requestFrom(SMARTY, TD_BUFFER_SIZE, I2C_NOSTOP);
+  WIRE.requestFrom(SMARTY, TD_BUFFER_SIZE, I2C_STOP);
   if (WIRE.available()) {
     recv[recve] = WIRE.read();
   } else {
