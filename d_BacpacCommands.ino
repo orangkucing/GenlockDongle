@@ -32,6 +32,7 @@ void cameraCommand()
       buf[0] = 1; buf[1] = 1; // NAK
     }
     SendBufToBacpac();
+    queueIn("WI0"); // wifi LED off
     break;
 /*********************************************************************
  data structure for {GET|SET}_CAMERA_SETTING is the same as follows: */
