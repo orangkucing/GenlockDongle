@@ -91,7 +91,8 @@ void loop()
   static unsigned long lastHeartBeat = 0;
   static boolean pwrbtn = true;
   
-  if (digitalRead(BPRDY) == LOW && digitalRead(PWRBTN) == LOW) { // slave: power button of main camera depressed
+  //if (digitalRead(BPRDY) == LOW && digitalRead(PWRBTN) == LOW) { // slave: power button of main camera depressed
+  if ((PINC & (_BV(1) | _BV(3))) == 0) { // speed up!
     pwrbtn = false;
     delayMicroseconds(10500);
     while (digitalRead(PWRBTN) == LOW) {
@@ -105,6 +106,7 @@ void loop()
     if (1) {
       Serial.println("");
       Serial.println("@");  // power on slaves
+      Serial.flush();
     }
   }
   if (poweron) {

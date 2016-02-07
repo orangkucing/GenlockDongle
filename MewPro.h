@@ -42,6 +42,7 @@ const int SET_CAMERA_3D_SYNCHRONIZE = ('S' << 8) + 'Y';
 const int SET_CAMERA_SHUTTER_ACTION = ('S' << 8) + 'H';
 const int SET_CAMERA_USBMODE        = ('U' << 8) + 'M';
 const int SET_BACPAC_SHUTTER_ACTION = ('S' << 8) + 'H';
+const int SET_BACPAC_POWER_DOWN     = ('P' << 8) + 'W';
 
 // commands relating to TD SET_CAMERA_SETTING
 // buffer to store current camera settings

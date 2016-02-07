@@ -1,4 +1,4 @@
-#define MEWPRO_VERSION_STRING "2016020402"
+#define MEWPRO_VERSION_STRING "2016020700"
 
 void printHex(uint8_t d, boolean upper)
 {
@@ -84,10 +84,17 @@ void cameraCommand()
     // 0x27  0x28   EV SET_BACPAC_PROTUNE_EXPOSURE_VALUE
     // -----+-----+-----------------------------------------------------
   case GET_CAMERA_SETTING:
+    if (!heartBeatIsOn) {
+      for (int i = 0; i < TD_BUFFER_SIZE; i++) { // initialize td[] from PGMMEM constant array
+        td[i] = pgm_read_byte(td_init + i);
+      }
+    }
     memcpy(buf + 2, td + 3, TD_BUFFER_SIZE - 3);
     buf[0] = 0x27; buf[1] = 0;
     SendBufToBacpac();
-    heartBeatIsOn = true;
+    if (isMaster) {
+      heartBeatIsOn = true;
+    }
     break;
   case SET_CAMERA_SETTING:
     __debug(F("camera settings received"));
@@ -106,9 +113,9 @@ void cameraCommand()
     }
     buf[0] = 1; buf[1] = 0; // ok
     SendBufToBacpac();
-    if (!heartBeatIsOn && !isMaster) {
+    if (!heartBeatIsOn) { // I'm slave
       // Apply received TD
-      buf[0] = 3; buf[1] = 'F'; buf[2] = 'N'; buf[3] = 0x0C;
+      buf[0] = 0x83; buf[1] = 'F'; buf[2] = 'N'; buf[3] = 0x0C;
       // finished!
       SendBufToBacpac(); // report to Primary Camera
       heartBeatIsOn = true;
@@ -194,20 +201,22 @@ void cameraCommand()
       Serial.print("SY");
       printHex(RECV(3), true);
       Serial.println("");
+      Serial.flush();
     }
     buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
-    if (!isMaster && RECV(3) == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
+    if (RECV(3) == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
       // video capture end
       buf[3] = 3; // notify video saved
     } else {
       buf[3] = RECV(3);
     }
+    delay(200); // a short delay is necessary
     SendBufToBacpac();
     if (td[TD_MODE] == MODE_TIMELAPSE) {
       switch (RECV(3)) {
       case 1:
       case 2:
-        timelapse = 1900;
+        timelapse = 1800;
         break;
       default:
         timelapse = 0;
