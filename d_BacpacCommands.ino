@@ -93,6 +93,13 @@ void cameraCommand()
     buf[0] = 0x27; buf[1] = 0;
     SendBufToBacpac();
     if (isMaster) {
+      if (heartBeatIsOn) { // send to slaves
+        Serial.print("TD");
+        for (int i = 3; i < TD_BUFFER_SIZE; i++) {
+          printHex(td[i], true);
+        }
+        Serial.println("");
+      }
       heartBeatIsOn = true;
     }
     break;
@@ -203,15 +210,13 @@ void cameraCommand()
       Serial.println("");
       Serial.flush();
     }
-    buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R';
-    if (RECV(3) == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
-      // video capture end
-      buf[3] = 3; // notify video saved
-    } else {
-      buf[3] = RECV(3);
-    }
-    delay(200); // a short delay is necessary
+    buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R'; buf[3] = RECV(3);
+    delay(200);
     SendBufToBacpac();
+    if (buf[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
+      queueIn("SR3"); // notify video saved
+      delay(2000);
+    }
     if (td[TD_MODE] == MODE_TIMELAPSE) {
       switch (RECV(3)) {
       case 1:
