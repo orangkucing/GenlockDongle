@@ -204,14 +204,16 @@ void cameraCommand()
     break;
   case SET_CAMERA_3D_SYNCHRONIZE:
     // Master shutter button depressed
-    if (1) { // send to slaves
+    if (!isMaster) { // send to slaves
       Serial.print("SY");
       printHex(RECV(3), true);
       Serial.println("");
-      Serial.flush();
     }
     buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R'; buf[3] = RECV(3);
-    delay(200);
+    if (buf[3] == 1) {
+      delay(1000); // start of a capture requres additional delay
+    }
+    delay(140);
     SendBufToBacpac();
     if (buf[3] == 0 && td[TD_MODE] != MODE_TIMELAPSE) {
       queueIn("SR3"); // notify video saved
@@ -221,7 +223,7 @@ void cameraCommand()
       switch (RECV(3)) {
       case 1:
       case 2:
-        timelapse = 1800;
+        timelapse = 1900;
         break;
       default:
         timelapse = 0;
