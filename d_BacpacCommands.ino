@@ -204,7 +204,7 @@ void cameraCommand()
     break;
   case SET_CAMERA_3D_SYNCHRONIZE:
     // Master shutter button depressed
-    if (!isMaster) { // send to slaves
+    if (1) { // send to slaves
       Serial.print("SY");
       printHex(RECV(3), true);
       Serial.println("");
