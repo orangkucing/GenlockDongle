@@ -210,7 +210,7 @@ void cameraCommand()
       Serial.println("");
     }
     buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R'; buf[3] = RECV(3);
-    if (buf[3] == 1) {
+    if (buf[3] == 1 && (!isMaster || td[TD_MODE] != MODE_TIMELAPSE)) {
       delay(1000); // start of a capture requres additional delay
     }
     delay(140);
