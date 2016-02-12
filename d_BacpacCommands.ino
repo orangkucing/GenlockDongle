@@ -1,4 +1,4 @@
-#define MEWPRO_VERSION_STRING "2016020700"
+#define MEWPRO_VERSION_STRING "2016021200"
 
 void printHex(uint8_t d, boolean upper)
 {
@@ -210,7 +210,7 @@ void cameraCommand()
       Serial.println("");
     }
     buf[0] = 0x83; buf[1] = 'S'; buf[2] = 'R'; buf[3] = RECV(3);
-    if (buf[3] == 1 && td[TD_MODE] != MODE_TIMELAPSE) {
+    if (buf[3] == 1) {
       delay(1000); // start of a capture requres additional delay
     }
     delay(140);
