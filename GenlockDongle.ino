@@ -4,9 +4,6 @@
 
 //   Copyright (c) 2015 orangkucing
 
-// enable console output
-boolean debug = false;
-
 //********************************************************
 // c_I2C: I2C interface
 //
@@ -57,6 +54,9 @@ boolean debug = false;
 
 #include <Arduino.h>
 #include "MewPro.h"
+
+// enable console output
+boolean debug = false;
 
 volatile boolean poweron = false;
 boolean dontSendPW = false;
