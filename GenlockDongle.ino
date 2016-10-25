@@ -49,6 +49,15 @@
 // it is better to define this when RXI is connected to nothing (eg. Dongle #1 of single dongle configuration or Dongle #0)
 #undef  UART_RECEIVER_DISABLE
 
+// define this in order to achieve improved boot-up stability
+// by executing watchdog timer reset after every power-down.
+// WARNING: to enable this requres Arduino Pro Mini's bootloader support
+// watchdog timer (usual boards don't support this).
+// To burn a bootloader supporting watchdog timer please refer
+// https://andreasrohner.at/posts/Electronics/How-to-make-the-Watchdog-Timer-work-on-an-Arduino-Pro-Mini-by-replacing-the-bootloader/
+#include <avr/wdt.h>
+#undef SOFTWARE_RESET
+
 // end of Options
 //////////////////////////////////////////////////////////
 

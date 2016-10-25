@@ -161,6 +161,11 @@ void cameraCommand()
       dontSendPW = false;
       heartBeatIsOn = false;
     }
+#ifdef SOFTWARE_RESET
+    wdt_enable(WDTO_1S);
+    while (1); // loop forever
+    // never reach here
+#endif
     break;
   case SET_CAMERA_FAULT:
     switch (RECV(3)) {
